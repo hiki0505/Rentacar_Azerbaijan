@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'cars')
+        fields = ('id', 'username', 'phone', 'cars')
 
 
 # Register Serializer

@@ -7,6 +7,9 @@ from rest_framework.routers import DefaultRouter
 
 # from .api import UserAPI, LoginAPI
 
+# from rest_framework_simplejwt import views as jwt_views
+from rest_framework_jwt.views import obtain_jwt_token
+
 urlpatterns = [
     path('api/auth', include('knox.urls')),
     path('api/auth/validate_phone', ValidatePhoneSendOTP.as_view(), name='send_otp'),
@@ -17,7 +20,11 @@ urlpatterns = [
     path('api/auth/validate_forgot_otp', ForgotValidateOTP.as_view(), name='validate-forgot-otp'),
     path('api/auth/forgot_password_change', ForgetPasswordChange.as_view(), name='forgot-password-change'),
     # path('api/auth/register', RegisterAPI.as_view()),
-    path('api/auth/login', LoginAPI.as_view()),
+    # path('api/auth/login', LoginAPI.as_view()),
+    path('api-token-auth/', obtain_jwt_token),
+    # path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+
     path('api/auth/user/<int:pk>', RetrieveUpdateDestroyUserAPI.as_view(), name='user_detail'),
     path('api/auth/user', ListUserAPI.as_view(), name='user'),
     path('api/auth/user-info', UserDetail.as_view(), name='user-info'),

@@ -77,7 +77,7 @@ class ValidatePhoneSendOTP(APIView):
                     })
                 # print(request.session)
                 # print(request.session.get('view'))
-                request.session['phone'] = phone
+                # request.session['phone'] = phone
                 print('------------------')
                 # print(request.session)
                 # print(request.session.get('phone'))
@@ -104,12 +104,14 @@ class ValidateOTP(APIView):
         # print(phone)
         # print('The requested phone (session) was:', request.session.get('phone'))
         # phone = request.data.get('phone', False)
-        phone = request.session.get('phone')
+        # phone = request.session.get('phone')
+
         otp_sent = request.data.get('otp', False)
 
-        if phone and otp_sent:
-            old = PhoneOTP.objects.filter(phone__iexact=phone)
-            user = CustomUser.objects.filter(phone__iexact=phone)
+        if otp_sent:
+            old = PhoneOTP.objects.filter(otp=otp_sent)
+            # user = CustomUser.objects.filter(phone__iexact=phone)
+            user = CustomUser.objects.filter(phone__iexact=old.first().phone)
             user = user.first()
             if old.exists():
                 old = old.first()
@@ -241,8 +243,8 @@ class ValidatePhoneForgot(APIView):
 
                         )
                         send_otp(phone, otp)
-                        request.session['phone_forgot'] = phone
-                        print(request.session.get('phone_forgot'))
+                        # request.session['phone_forgot'] = phone
+                        # print(request.session.get('phone_forgot'))
                         return Response({'status': True, 'detail': 'OTP has been sent for password reset'})
 
                 else:
@@ -264,11 +266,11 @@ class ForgotValidateOTP(APIView):
 
     def post(self, request, *args, **kwargs):
         # phone = request.data.get('phone', False)
-        phone = request.session.get('phone_forgot', False)
+        # phone = request.session.get('phone_forgot', False)
         otp_sent = request.data.get('otp', False)
-        print(phone)
-        if phone and otp_sent:
-            old = PhoneOTP.objects.filter(phone__iexact=phone)
+        # print(phone)
+        if otp_sent:
+            old = PhoneOTP.objects.filter(otp=otp_sent)
             if old.exists():
                 old = old.first()
                 if old.forgot == False:
@@ -281,8 +283,8 @@ class ForgotValidateOTP(APIView):
                 if str(otp) == str(otp_sent):
                     old.forgot_logged = True
                     old.save()
-                    request.session['phone_otp'] = otp
-                    print(request.session.get('phone_otp'))
+                    # request.session['phone_otp'] = otp
+                    # print(request.session.get('phone_otp'))
                     return Response({
                         'status': True,
                         'detail': 'OTP matched, kindly proceed to create new password'
@@ -295,7 +297,7 @@ class ForgotValidateOTP(APIView):
             else:
                 return Response({
                     'status': False,
-                    'detail': 'Phone not recognised. Kindly request a new otp with this number'
+                    'detail': 'Wrong OTP. Try again or request new OTP'
                 })
 
 
@@ -314,13 +316,18 @@ class ForgetPasswordChange(APIView):
     def post(self, request, *args, **kwargs):
         # phone = request.data.get('phone', False)
         # otp = request.data.get("otp", False)
-        phone = request.session.get('phone_forgot', False)
-        otp = request.session.get('phone_otp', False)
-        print(phone)
-        print(otp)
+        phone = request.data.get('phone', False)
+        # otp = request.session.get('phone_otp', False)
+        # print(phone)
+        # print(otp)
         password = request.data.get('password', False)
 
-        if phone and otp and password:
+        if phone and password:
+            forgot_phone = PhoneOTP.objects.filter(phone__iexact=phone)
+            otp = None
+            if forgot_phone:
+                otp = forgot_phone.first().otp
+            print(otp)
             old = PhoneOTP.objects.filter(Q(phone__iexact=phone) & Q(otp__iexact=otp))
             if old.exists():
                 old = old.first()
